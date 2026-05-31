@@ -1,0 +1,77 @@
+# 进度
+
+## 当前阶段：M0 项目初始化
+
+### 已完成
+
+#### M0 项目骨架
+- [x] Git 仓库初始化 + GitHub remote
+- [x] `.kiro/` 配置（steering + agents + sh）
+- [x] `docs/` 文档骨架（architecture / progress / kiro-log）
+- [x] kiro-agents 同步系统接入
+
+### 待实现
+
+#### M1 基础设施
+- [ ] Python 包结构搭建（config/utils/models）
+- [ ] 配置加载（Pydantic v2）
+- [ ] ADB 工具封装（设备发现/连接/截图）
+- [ ] SQLite schema 设计 + migration
+- [ ] CLI 入口
+
+#### M2 仓库管理 + 代码分析
+- [ ] repo 模块：clone / pull / branch 切换
+- [ ] analyzer：Java/Kotlin AST 解析（tree-sitter）
+- [ ] analyzer：类/方法/依赖提取
+- [ ] analyzer：覆盖率分析接口
+
+#### M3 单元测试生成
+- [ ] generator/unit：基于分析结果生成 JUnit 测试
+- [ ] 模板引擎（Jinja2）
+- [ ] 边界值 / 异常路径自动推断
+
+#### M4 人工测试用例
+- [ ] generator/manual：结构化用例模板
+- [ ] 用例 CRUD（SQLite 存储）
+- [ ] 用例导入/导出（YAML/Excel）
+
+#### M5 UI 自动化
+- [ ] runner/ui：uiautomator2 集成
+- [ ] 页面对象模型（POM）
+- [ ] 测试脚本录制/回放
+
+#### M6 稳定性测试
+- [ ] runner/stability：Monkey 封装
+- [ ] 自定义事件序列
+- [ ] 崩溃/ANR 日志收集与分析
+
+#### M7 OpenCV UI 对比
+- [ ] runner/opencv：截图采集
+- [ ] SSIM 相似度计算
+- [ ] 差异区域标注 + mask 排除
+- [ ] 基线管理（版本化）
+
+#### M8 报告
+- [ ] reporter：HTML 报告模板
+- [ ] 测试趋势图表
+- [ ] 失败用例截图嵌入
+
+#### M9 GUI（可选）
+- [ ] PySide6 主窗口
+- [ ] 设备管理页
+- [ ] 测试执行页
+- [ ] 报告浏览页
+
+## 模块状态
+
+| 模块 | 状态 | 备注 |
+|------|------|------|
+| config | ⬜ | 待实现 |
+| repo | ⬜ | 待实现 |
+| analyzer | ⬜ | 待实现 |
+| generator | ⬜ | 待实现 |
+| runner | ⬜ | 待实现 |
+| reporter | ⬜ | 待实现 |
+| storage | ⬜ | 待实现 |
+| utils | ⬜ | 待实现 |
+| gui | ⬜ | 待实现 |
