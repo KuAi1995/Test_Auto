@@ -24,19 +24,23 @@
 #### M2 仓库管理 + 代码分析
 - [x] analyzer：Java AST 解析（javalang）
 - [x] analyzer：类/方法/依赖提取
-- [ ] analyzer：类/方法/依赖提取
-- [ ] analyzer：覆盖率分析接口
+- [x] analyzer：构造函数参数解析
+- [x] analyzer：AndroidManifest 解析（包名/Activity/权限）
+- [x] analyzer：增量分析（git diff）
+- [x] analyzer：覆盖率分析接口
 
 #### M3 单元测试生成
 - [x] generator/unit：基于分析结果生成 JUnit 测试
 - [x] 自动区分 Robolectric / 纯 JUnit
-- [ ] 模板引擎（Jinja2）— 当前用字符串模板，够用
-- [ ] 边界值 / 异常路径自动推断
+- [x] 构造函数参数感知（正确生成 setUp）
+- [x] 边界值 / 异常路径自动推断（null 参数测试）
+- [ ] 模板引擎（Jinja2）— 当前字符串模板够用
 
 #### M4 人工测试用例
 - [x] generator/manual：结构化用例模板
-- [ ] 用例 CRUD（SQLite 存储）
-- [ ] 用例导入/导出（YAML/Excel）
+- [x] 用例 CRUD（SQLite 存储）
+- [x] 用例导入/导出（YAML）
+- [ ] 用例导出 Excel
 
 #### M5 UI 自动化
 - [x] runner/ui：uiautomator2 集成
@@ -45,13 +49,13 @@
 
 #### M6 稳定性测试
 - [x] runner/stability：Monkey 封装
+- [x] 崩溃/ANR 日志收集与分析
 - [ ] 自定义事件序列
-- [ ] 崩溃/ANR 日志收集与分析
 
 #### M7 OpenCV UI 对比
 - [x] runner/opencv：SSIM 相似度计算
 - [x] 差异区域标注 + mask 排除
-- [ ] 基线管理（版本化）
+- [x] 基线管理（版本化 + 自动备份）
 
 #### M8 报告
 - [x] reporter：HTML 报告模板
@@ -71,11 +75,11 @@
 |------|------|------|
 | config | ✅ | Pydantic v2 + YAML |
 | repo | ✅ | clone/pull/status |
-| analyzer | ✅ | Java AST (javalang) |
-| generator | 🟡 | unit 生成器完成 |
+| analyzer | ✅ | Java AST + Manifest + 覆盖率 + 增量 |
+| generator | ✅ | unit(边界值) + manual |
 | runner | 🟡 | ui/stability/opencv 核心完成 |
 | reporter | ✅ | HTML + JSON |
-| storage | ✅ | SQLite schema v1 |
+| storage | ✅ | SQLite v2 + CRUD + 持久化 |
 | utils | 🟡 | ADB 封装完成 |
 | models | ✅ | 核心数据模型 |
 | gui | ⬜ | 待实现 |

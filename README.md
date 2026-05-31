@@ -58,6 +58,10 @@ python -m test_auto generate unit           # 生成单元测试
 python -m test_auto generate manual         # 生成人工测试用例
 python -m test_auto run                     # 执行完整流程
 python -m test_auto run --skip-clone        # 跳过仓库同步
+python -m test_auto coverage                # 覆盖率分析
+python -m test_auto cases import --file x   # 导入用例
+python -m test_auto cases stats             # 用例统计
+python -m test_auto history                 # 运行历史
 python -m test_auto devices                 # 列出已连接设备
 ```
 

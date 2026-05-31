@@ -66,3 +66,18 @@
 - [决策] `python -m test_auto run` 一键执行: clone → 分析 → 生成 → 报告
 - [决策] 支持 --skip-clone 跳过仓库同步（开发调试用）
 - FUOS 完整流程验证通过：0.2s 完成分析+生成+报告
+
+### 16:16 全面优化
+
+- [已解决] 构造函数分析：解析 Java 构造函数参数，修复 SPUtils 等类的 setUp 生成
+- [已解决] AndroidManifest 解析：自动提取包名/Activity/权限，支持 AGP 8+ namespace
+- [已解决] 测试结果持久化：每次 run 写入 SQLite，支持 history 查询
+- [已解决] 覆盖率分析：对比已生成测试 vs 全部方法，输出未覆盖类列表
+- [已解决] 边界值测试：为 String 等可 null 参数自动生成 null 参数测试
+- [已解决] 用例 CRUD：import/export/list/stats，YAML ↔ SQLite
+- [已解决] 崩溃日志分析器：从 logcat 提取 FATAL EXCEPTION + ANR
+- [已解决] 基线管理：版本化存储 + 更新时自动备份旧基线
+- [已解决] 增量分析：支持 --incremental 只分析 git diff 变更文件
+- [决策] 覆盖率结果：FUOS 类覆盖 83%（15/18），3 个未覆盖类因无公开方法或为工具类
+- [决策] schema 升级到 v2，新增 analysis_cache + test_run.repo_name/report_path
+- CLI 新增命令：coverage / cases / history
