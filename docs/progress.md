@@ -1,6 +1,6 @@
 # 进度
 
-## 当前阶段：M0 项目初始化
+## 当前阶段：M1 基础设施（已完成）
 
 ### 已完成
 
@@ -10,17 +10,18 @@
 - [x] `docs/` 文档骨架（architecture / progress / kiro-log）
 - [x] kiro-agents 同步系统接入
 
+#### M1 基础设施
+- [x] Python 包结构搭建（config/utils/models）
+- [x] 配置加载（Pydantic v2 + YAML）
+- [x] ADB 工具封装（设备发现/连接/截图）
+- [x] SQLite schema 设计 + migration
+- [x] CLI 入口（init/devices/repo/analyze）
+- [x] 数据模型定义（TestCase/TestResult/ClassInfo/MethodInfo）
+- [x] repo 模块：clone/pull/status
+
 ### 待实现
 
-#### M1 基础设施
-- [ ] Python 包结构搭建（config/utils/models）
-- [ ] 配置加载（Pydantic v2）
-- [ ] ADB 工具封装（设备发现/连接/截图）
-- [ ] SQLite schema 设计 + migration
-- [ ] CLI 入口
-
 #### M2 仓库管理 + 代码分析
-- [ ] repo 模块：clone / pull / branch 切换
 - [ ] analyzer：Java/Kotlin AST 解析（tree-sitter）
 - [ ] analyzer：类/方法/依赖提取
 - [ ] analyzer：覆盖率分析接口
@@ -66,12 +67,13 @@
 
 | 模块 | 状态 | 备注 |
 |------|------|------|
-| config | ⬜ | 待实现 |
-| repo | ⬜ | 待实现 |
+| config | ✅ | Pydantic v2 + YAML |
+| repo | ✅ | clone/pull/status |
 | analyzer | ⬜ | 待实现 |
 | generator | ⬜ | 待实现 |
 | runner | ⬜ | 待实现 |
 | reporter | ⬜ | 待实现 |
-| storage | ⬜ | 待实现 |
-| utils | ⬜ | 待实现 |
+| storage | ✅ | SQLite schema v1 |
+| utils | 🟡 | ADB 封装完成 |
+| models | ✅ | 核心数据模型 |
 | gui | ⬜ | 待实现 |

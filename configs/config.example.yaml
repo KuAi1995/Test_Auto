@@ -1,0 +1,34 @@
+# Test_Auto 配置文件
+# 复制此文件为 config.yaml 并填写实际值
+
+project_name: "Test_Auto"
+
+# 目标仓库
+repos:
+  fuos:
+    url: ""  # git@github.com:KuAi1995/FUOS.git
+    branch: "main"
+    depth: 0  # 0=完整 clone, >0=shallow clone
+
+# 设备列表
+devices: []
+#  - serial: ""
+#    name: ""
+#    platform_version: ""
+
+# OpenCV 配置
+opencv:
+  similarity_threshold: 0.95
+  mask_regions: []
+
+# 存储
+storage:
+  db_path: "data/db/test_auto.db"
+  screenshots_dir: "data/screenshots"
+  baselines_dir: "data/baselines"
+
+# 工作目录（clone 的仓库存放位置）
+workspace_dir: "workspace"
+
+# 日志级别
+log_level: "INFO"
