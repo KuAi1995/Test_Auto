@@ -5,16 +5,30 @@ import logging
 import sys
 
 from test_auto import __version__
-from test_auto.config.settings import load_settings
+from test_auto.config.settings import load_settings, validate_settings
 
 
-def setup_logging(level: str) -> None:
-    """配置日志."""
-    logging.basicConfig(
-        level=getattr(logging, level.upper(), logging.INFO),
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        datefmt="%H:%M:%S",
-    )
+def setup_logging(level: str, verbose: bool = False) -> None:
+    """配置日志（控制台 + 文件）."""
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    # 控制台：精简格式
+    console_level = logging.DEBUG if verbose else getattr(logging, level.upper(), logging.INFO)
+    console = logging.StreamHandler()
+    console.setLevel(console_level)
+    console.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%H:%M:%S"))
+    root.addHandler(console)
+
+    # 文件：详细格式
+    from pathlib import Path
+    log_dir = Path("data/logs")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    file_handler = logging.FileHandler(log_dir / "test_auto.log", encoding="utf-8")
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"))
+    root.addHandler(file_handler)
 
 
 def main() -> int:
@@ -29,6 +43,7 @@ def main() -> int:
     )
     parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("-c", "--config", help="配置文件路径", default=None)
+    parser.add_argument("-v", "--verbose", action="store_true", help="详细日志输出")
 
     subparsers = parser.add_subparsers(dest="command")
 
@@ -42,7 +57,7 @@ def main() -> int:
 
     # generate 子命令
     gen_parser = subparsers.add_parser("generate", help="生成测试")
-    gen_parser.add_argument("type", choices=["unit", "manual"], help="测试类型")
+    gen_parser.add_argument("type", choices=["unit", "manual", "e2e"], help="测试类型")
     gen_parser.add_argument("--name", help="仓库名称")
     gen_parser.add_argument("--output", help="输出目录", default=None)
 
@@ -71,15 +86,25 @@ def main() -> int:
     hist_parser = subparsers.add_parser("history", help="测试运行历史")
     hist_parser.add_argument("--limit", type=int, default=10, help="显示条数")
 
+    # watch 子命令
+    watch_parser = subparsers.add_parser("watch", help="监听变更自动分析")
+    watch_parser.add_argument("--name", help="仓库名称")
+    watch_parser.add_argument("--interval", type=int, default=30, help="轮询间隔(秒)")
+
     args = parser.parse_args()
 
     from pathlib import Path
 
     config_path = Path(args.config) if args.config else None
     settings = load_settings(config_path)
-    setup_logging(settings.log_level)
+    setup_logging(settings.log_level, verbose=args.verbose)
 
     logger = logging.getLogger(__name__)
+
+    # 配置校验
+    warnings = validate_settings(settings)
+    for w in warnings:
+        logger.warning("配置: %s", w)
 
     if args.command == "init":
         from test_auto.storage.database import Database
@@ -178,6 +203,20 @@ def main() -> int:
             print(f"\n生成 {len(files)} 个单元测试文件 → {output_dir}")
             for f in files:
                 print(f"  {f.relative_to(output_dir)}")
+        elif args.type == "e2e":
+            from test_auto.analyzer.manifest_parser import find_manifest, parse_manifest
+            from test_auto.generator.e2e.generator import E2EGenerator
+
+            manifest_path = find_manifest(repo_path)
+            if not manifest_path:
+                logger.error("未找到 AndroidManifest.xml")
+                return 1
+            manifest_info = parse_manifest(manifest_path)
+            output_dir = P(args.output) if args.output else P("output/e2e") / name
+            gen = E2EGenerator(output_dir)
+            path = gen.generate(manifest_info)
+            if path:
+                print(f"\nE2E 脚本已生成 → {path}")
         else:
             from test_auto.generator.manual.generator import ManualTestGenerator
 
@@ -264,6 +303,13 @@ def main() -> int:
                       f"total={r['total']} pass={r['passed']} fail={r['failed']} | "
                       f"{r.get('repo_name', '')}")
         db.close()
+        return 0
+
+    if args.command == "watch":
+        from test_auto.utils.watcher import Watcher
+
+        watcher = Watcher(settings, repo_name=args.name, interval=args.interval)
+        watcher.run()
         return 0
 
     logger.warning("未实现的命令: %s", args.command)

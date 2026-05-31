@@ -73,3 +73,27 @@ def load_settings(config_path: Optional[Path] = None) -> Settings:
         data = yaml.safe_load(f) or {}
 
     return Settings(**data)
+
+
+def validate_settings(settings: Settings) -> list[str]:
+    """校验配置完整性.
+
+    Args:
+        settings: 配置实例
+
+    Returns:
+        警告信息列表（空列表表示配置完整）
+    """
+    warnings = []
+
+    if not settings.repos:
+        warnings.append("未配置任何目标仓库 (repos)")
+    else:
+        for name, repo in settings.repos.items():
+            if not repo.url:
+                warnings.append(f"仓库 '{name}' 未配置 URL")
+
+    if not Path(settings.workspace_dir).parent.exists():
+        warnings.append(f"工作目录父路径不存在: {settings.workspace_dir}")
+
+    return warnings

@@ -14,13 +14,17 @@ Android App 自动化测试平台 —— 从代码分析到全路径自动化测
 
 | 测试类型 | 工具 | 状态 | 说明 |
 |----------|------|------|------|
-| 代码分析 | javalang (Java AST) | ✅ | 类/方法/继承/Activity 识别 |
-| 单元测试生成 | JUnit / Robolectric | ✅ | 自动区分需 Context 的类 |
+| 代码分析 | javalang (Java AST) | ✅ | 类/方法/继承/Activity/构造函数/依赖图 |
+| 资源分析 | XML Parser | ✅ | AndroidManifest + attrs.xml |
+| 单元测试生成 | JUnit / Robolectric | ✅ | 自动区分 + 边界值测试 |
 | 人工测试用例 | YAML 结构化模板 | ✅ | Widget 交互 + 工具类功能 |
+| E2E 脚本生成 | uiautomator2 | ✅ | 基于 Manifest 自动遍历 |
 | UI 自动化 | uiautomator2 | ✅ | 连接/启动/点击/截图/滑动 |
 | 稳定性测试 | Monkey | ✅ | 事件注入/崩溃检测/日志解析 |
-| UI 对比 | OpenCV (SSIM) | ✅ | 差异标注 + mask 排除 |
-| 测试报告 | HTML + JSON | ✅ | 统计摘要 + 详细结果 |
+| UI 对比 | OpenCV (SSIM) | ✅ | 差异标注 + mask 排除 + 基线管理 |
+| 测试报告 | HTML + JSON + JUnit XML | ✅ | 趋势图 + 截图嵌入 + CI 集成 |
+| 覆盖率 | 静态分析 | ✅ | 类/方法级覆盖率 |
+| Watch 模式 | 文件轮询 | ✅ | 变更自动触发增量分析 |
 
 ## 核心流程
 
@@ -56,6 +60,7 @@ python -m test_auto repo pull               # Pull 最新代码
 python -m test_auto analyze                 # 代码分析
 python -m test_auto generate unit           # 生成单元测试
 python -m test_auto generate manual         # 生成人工测试用例
+python -m test_auto generate e2e            # 生成 E2E 遍历脚本
 python -m test_auto run                     # 执行完整流程
 python -m test_auto run --skip-clone        # 跳过仓库同步
 python -m test_auto coverage                # 覆盖率分析
@@ -63,6 +68,7 @@ python -m test_auto cases import --file x   # 导入用例
 python -m test_auto cases stats             # 用例统计
 python -m test_auto history                 # 运行历史
 python -m test_auto devices                 # 列出已连接设备
+python -m test_auto watch                   # Watch 模式（变更自动分析）
 ```
 
 ## 目录结构

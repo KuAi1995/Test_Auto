@@ -11,6 +11,7 @@ from test_auto.analyzer.coverage import analyze_coverage
 from test_auto.analyzer.manifest_parser import find_manifest, parse_manifest
 from test_auto.analyzer.scanner import Analyzer
 from test_auto.config.settings import Settings
+from test_auto.generator.e2e.generator import E2EGenerator
 from test_auto.generator.manual.generator import ManualTestGenerator
 from test_auto.generator.unit.generator import UnitTestGenerator
 from test_auto.repo.manager import RepoManager
@@ -91,6 +92,11 @@ class Pipeline:
         manual_gen = ManualTestGenerator(output_base / "manual_cases")
         manual_gen.generate_for_project(analysis.classes, analysis.methods)
 
+        # E2E 脚本
+        if manifest_info:
+            e2e_gen = E2EGenerator(output_base / "e2e")
+            e2e_gen.generate(manifest_info)
+
         # Step 5: 覆盖率分析
         logger.info("[5/6] 覆盖率分析...")
         coverage = analyze_coverage(analysis.classes, analysis.methods, output_base / "unit_tests")
@@ -107,10 +113,17 @@ class Pipeline:
                 "message": f"{len(cls.methods)} methods, super={cls.superclass or 'Object'}",
             })
 
+        # 获取历史数据用于趋势图
+        history = self._db.get_run_history(repo_name=name, limit=10)
+
         report_path = self._reporter.generate_html(
             f"{name} 测试报告 (commit: {commit_hash})",
             results,
+            history=history,
         )
+
+        # JUnit XML（CI 集成）
+        self._reporter.generate_junit_xml(f"{name}_analysis", results)
 
         # 持久化运行记录
         self._db.save_run(

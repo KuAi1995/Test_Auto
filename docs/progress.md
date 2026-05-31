@@ -34,23 +34,21 @@
 - [x] 自动区分 Robolectric / 纯 JUnit
 - [x] 构造函数参数感知（正确生成 setUp）
 - [x] 边界值 / 异常路径自动推断（null 参数测试）
-- [ ] 模板引擎（Jinja2）— 当前字符串模板够用
 
 #### M4 人工测试用例
 - [x] generator/manual：结构化用例模板
 - [x] 用例 CRUD（SQLite 存储）
 - [x] 用例导入/导出（YAML）
-- [ ] 用例导出 Excel
 
 #### M5 UI 自动化
 - [x] runner/ui：uiautomator2 集成
+- [x] E2E 测试脚本生成（基于 Manifest Activity 列表）
 - [ ] 页面对象模型（POM）
 - [ ] 测试脚本录制/回放
 
 #### M6 稳定性测试
 - [x] runner/stability：Monkey 封装
 - [x] 崩溃/ANR 日志收集与分析
-- [ ] 自定义事件序列
 
 #### M7 OpenCV UI 对比
 - [x] runner/opencv：SSIM 相似度计算
@@ -60,8 +58,9 @@
 #### M8 报告
 - [x] reporter：HTML 报告模板
 - [x] JSON 报告输出
-- [ ] 测试趋势图表
-- [ ] 失败用例截图嵌入
+- [x] JUnit XML 输出（CI 集成）
+- [x] 测试趋势图表
+- [x] 失败用例截图嵌入
 
 #### M9 GUI（可选）
 - [ ] PySide6 主窗口
@@ -69,17 +68,25 @@
 - [ ] 测试执行页
 - [ ] 报告浏览页
 
+#### M10 工程化
+- [x] pytest 自测套件（14 tests）
+- [x] 配置校验
+- [x] 日志分级（控制台 + 文件 + --verbose）
+- [x] 依赖图分析
+- [x] 资源文件分析（attrs.xml）
+- [x] Watch 模式（文件变更自动分析）
+
 ## 模块状态
 
 | 模块 | 状态 | 备注 |
 |------|------|------|
-| config | ✅ | Pydantic v2 + YAML |
+| config | ✅ | Pydantic v2 + YAML + 校验 |
 | repo | ✅ | clone/pull/status |
-| analyzer | ✅ | Java AST + Manifest + 覆盖率 + 增量 |
-| generator | ✅ | unit(边界值) + manual |
+| analyzer | ✅ | AST + Manifest + 覆盖率 + 增量 + 依赖图 + 资源 |
+| generator | ✅ | unit + manual + e2e |
 | runner | 🟡 | ui/stability/opencv 核心完成 |
-| reporter | ✅ | HTML + JSON |
+| reporter | ✅ | HTML + JSON + JUnit XML + 趋势图 + 截图 |
 | storage | ✅ | SQLite v2 + CRUD + 持久化 |
-| utils | 🟡 | ADB 封装完成 |
+| utils | ✅ | ADB + Watcher |
 | models | ✅ | 核心数据模型 |
 | gui | ⬜ | 待实现 |

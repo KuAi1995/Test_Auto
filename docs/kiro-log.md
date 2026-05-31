@@ -81,3 +81,18 @@
 - [决策] 覆盖率结果：FUOS 类覆盖 83%（15/18），3 个未覆盖类因无公开方法或为工具类
 - [决策] schema 升级到 v2，新增 analysis_cache + test_run.repo_name/report_path
 - CLI 新增命令：coverage / cases / history
+
+### 16:51 第二轮全面增强
+
+- [已解决] E2E 测试脚本生成：基于 Manifest Activity 列表生成 uiautomator2 遍历脚本
+- [已解决] 报告截图嵌入：失败用例截图 base64 嵌入 HTML
+- [已解决] 测试趋势图表：多次 run 的通过率柱状图嵌入报告
+- [已解决] JUnit XML 输出：CI 集成格式，可接入 GitHub Actions
+- [已解决] 配置校验：启动时检查仓库 URL 等必填项
+- [已解决] 日志分级：控制台精简 + 文件详细 + --verbose 开关
+- [已解决] pytest 自测套件：14 个测试覆盖 config/analyzer/storage/reporter
+- [已解决] 依赖图分析：类引用关系图，识别核心类（ThemeUtils 被 11 个类依赖）
+- [已解决] 资源文件分析：解析 attrs.xml 提取 declare-styleable 和自定义属性
+- [已解决] Watch 模式：轮询监听文件变更，自动触发增量分析
+- [决策] E2E 脚本为独立可执行 Python 文件，`python test_e2e.py [serial]` 直接运行
+- [决策] JUnit XML 与 HTML 报告同时生成，不互斥

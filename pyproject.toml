@@ -18,6 +18,9 @@ test-auto = "test_auto.__main__:main"
 [tool.setuptools.packages.find]
 include = ["test_auto*"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [build-system]
 requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
