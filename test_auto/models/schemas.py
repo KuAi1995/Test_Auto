@@ -81,6 +81,7 @@ class ClassInfo(BaseModel):
     superclass: str = ""
     interfaces: list[str] = Field(default_factory=list)
     methods: list[str] = Field(default_factory=list)
+    constructors: list[list[str]] = Field(default_factory=list)  # 每个构造函数的参数列表
     is_abstract: bool = False
     is_activity: bool = False
     is_fragment: bool = False

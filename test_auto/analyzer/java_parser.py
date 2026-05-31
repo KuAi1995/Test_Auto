@@ -50,6 +50,17 @@ def parse_java_file(file_path: Path) -> Optional[ClassInfo]:
         for method in node.methods:
             methods.append(method.name)
 
+        # 解析构造函数
+        constructors = []
+        if node.constructors:
+            for ctor in node.constructors:
+                params = []
+                if ctor.parameters:
+                    for p in ctor.parameters:
+                        type_name = p.type.name if p.type else "Object"
+                        params.append(f"{type_name} {p.name}")
+                constructors.append(params)
+
         is_activity = superclass in _ACTIVITY_BASES
         is_fragment = superclass in _FRAGMENT_BASES
 
@@ -60,6 +71,7 @@ def parse_java_file(file_path: Path) -> Optional[ClassInfo]:
             superclass=superclass,
             interfaces=interfaces,
             methods=methods,
+            constructors=constructors,
             is_abstract="abstract" in (node.modifiers or []),
             is_activity=is_activity,
             is_fragment=is_fragment,

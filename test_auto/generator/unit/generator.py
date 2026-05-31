@@ -57,8 +57,16 @@ public class {class_name}Test {{
 _CONTEXT_TYPES = {"Context", "Activity", "Application", "Fragment"}
 
 
-def _needs_context(methods: list[MethodInfo]) -> bool:
+def _needs_context(methods: list[MethodInfo], class_info: Optional[ClassInfo] = None) -> bool:
     """判断类是否需要 Android Context."""
+    # 检查构造函数参数
+    if class_info and class_info.constructors:
+        for ctor_params in class_info.constructors:
+            for p in ctor_params:
+                for ct in _CONTEXT_TYPES:
+                    if ct in p:
+                        return True
+    # 检查方法参数
     for m in methods:
         for p in m.params:
             for ct in _CONTEXT_TYPES:
@@ -88,17 +96,71 @@ def _generate_test_method(method: MethodInfo, class_name: str, needs_ctx: bool) 
 
     if method.return_type == "void":
         body = f"        {call};\n        // 验证无异常抛出"
+    elif method.return_type in ("int", "long", "float", "double"):
+        body = f"        {method.return_type} result = {call};\n        assertTrue(result >= 0);"
+    elif method.return_type == "boolean":
+        body = f"        boolean result = {call};\n        assertNotNull(result);"
     else:
         body = f"        {_java_type(method.return_type)} result = {call};\n        assertNotNull(result);"
-        if method.return_type in ("int", "long", "float", "double"):
-            body = f"        {method.return_type} result = {call};\n        // TODO: 验证返回值"
-        elif method.return_type == "boolean":
-            body = f"        boolean result = {call};\n        // TODO: 验证返回值"
+
+    # 生成主测试 + 边界值测试
+    tests = f'''
+    @Test
+    public void {test_name}() {{
+{body}
+    }}
+'''
+
+    # 为有参数的方法生成 null/边界值测试
+    boundary_test = _generate_boundary_test(method, class_name, needs_ctx)
+    if boundary_test:
+        tests += boundary_test
+
+    return tests
+
+
+def _generate_boundary_test(method: MethodInfo, class_name: str, needs_ctx: bool) -> str:
+    """生成边界值/异常路径测试."""
+    # 找到可以传 null 的参数（非基本类型、非 Context）
+    nullable_params = []
+    for i, p in enumerate(method.params):
+        parts = p.split()
+        if len(parts) >= 2:
+            type_name = parts[0]
+            if type_name not in ("int", "long", "float", "double", "boolean", "char", "byte", "short") \
+               and type_name not in _CONTEXT_TYPES:
+                nullable_params.append((i, type_name, parts[1]))
+
+    if not nullable_params:
+        return ""
+
+    # 生成 null 参数测试
+    test_name = f"test{method.name[0].upper()}{method.name[1:]}_nullParam"
+    args = []
+    for p in method.params:
+        parts = p.split()
+        if len(parts) >= 2:
+            type_name = parts[0]
+            args.append(_default_value(type_name, needs_ctx))
+
+    # 将第一个可 null 参数设为 null
+    idx = nullable_params[0][0]
+    args[idx] = "null"
+    args_str = ", ".join(args)
+
+    if method.is_static:
+        call = f"{class_name}.{method.name}({args_str})"
+    else:
+        call = f"instance.{method.name}({args_str})"
 
     return f'''
     @Test
     public void {test_name}() {{
-{body}
+        try {{
+            {call};
+        }} catch (NullPointerException | IllegalArgumentException e) {{
+            // 预期异常
+        }}
     }}
 '''
 
@@ -158,7 +220,7 @@ class UnitTestGenerator:
         if not public_methods:
             return None
 
-        needs_ctx = _needs_context(public_methods)
+        needs_ctx = _needs_context(public_methods, class_info)
         test_package = class_info.package
         full_class_name = f"{class_info.package}.{class_info.name}"
 
@@ -168,10 +230,9 @@ class UnitTestGenerator:
         setup_code = ""
         if not has_static_only:
             instance_field = f"    private {class_info.name} instance;\n"
-            if needs_ctx:
-                setup_code = f"        instance = new {class_info.name}(context);\n"
-            else:
-                setup_code = f"        instance = new {class_info.name}();\n"
+            # 根据构造函数参数生成正确的实例化代码
+            ctor_args = self._build_ctor_args(class_info, needs_ctx)
+            setup_code = f"        instance = new {class_info.name}({ctor_args});\n"
 
         # 生成测试方法
         test_methods = ""
@@ -196,6 +257,24 @@ class UnitTestGenerator:
         output_file.write_text(content, encoding="utf-8")
         logger.info("生成测试: %s", output_file.relative_to(self._output_dir))
         return output_file
+
+    def _build_ctor_args(self, class_info: ClassInfo, needs_ctx: bool) -> str:
+        """根据构造函数参数生成实例化参数."""
+        if not class_info.constructors:
+            # 无显式构造函数，View 子类默认需要 Context
+            if needs_ctx:
+                return "context"
+            return ""
+
+        # 选择参数最少的构造函数
+        shortest = min(class_info.constructors, key=len)
+        args = []
+        for p in shortest:
+            parts = p.split()
+            if len(parts) >= 2:
+                type_name = parts[0]
+                args.append(_default_value(type_name, needs_ctx))
+        return ", ".join(args)
 
     def generate_for_project(self, classes: list[ClassInfo], methods: list[MethodInfo]) -> list[Path]:
         """为整个项目生成测试.

@@ -1,7 +1,9 @@
 """代码分析器 - 扫描项目并提取结构信息."""
 
 import logging
+import subprocess
 from pathlib import Path
+from typing import Optional
 
 from test_auto.analyzer.java_parser import parse_java_file, parse_methods
 from test_auto.models.schemas import ClassInfo, MethodInfo
@@ -47,18 +49,61 @@ class Analyzer:
         """
         self._root = project_path
 
-    def analyze(self) -> AnalysisResult:
-        """执行全量分析.
+    def analyze(self, incremental: bool = False) -> AnalysisResult:
+        """执行分析.
+
+        Args:
+            incremental: 是否增量分析（只分析 git diff 变更文件）
 
         Returns:
             分析结果
         """
+        if incremental:
+            java_files = self._get_changed_files()
+            if not java_files:
+                logger.info("无变更文件，跳过增量分析")
+                return AnalysisResult()
+            logger.info("增量分析 %d 个变更文件", len(java_files))
+        else:
+            java_files = list(self._root.rglob("*.java"))
+            logger.info("发现 %d 个 Java 文件", len(java_files))
+
+        return self._analyze_files(java_files)
+
+    def get_commit_hash(self) -> str:
+        """获取当前 commit hash."""
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                capture_output=True, text=True, cwd=self._root, timeout=10,
+            )
+            return result.stdout.strip() if result.returncode == 0 else ""
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return ""
+
+    def _get_changed_files(self) -> list[Path]:
+        """获取 git diff 变更的 Java 文件."""
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--name-only", "HEAD~1", "--", "*.java"],
+                capture_output=True, text=True, cwd=self._root, timeout=10,
+            )
+            if result.returncode != 0:
+                return []
+            files = []
+            for line in result.stdout.strip().splitlines():
+                f = self._root / line
+                if f.exists():
+                    files.append(f)
+            return files
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return []
+
+    def _analyze_files(self, java_files: list[Path]) -> AnalysisResult:
+        """分析文件列表."""
         result = AnalysisResult()
-        java_files = list(self._root.rglob("*.java"))
-        logger.info("发现 %d 个 Java 文件", len(java_files))
 
         for f in java_files:
-            # 跳过 build 目录和测试目录
             rel = str(f.relative_to(self._root))
             if "/build/" in rel or "/test/" in rel or "/androidTest/" in rel:
                 continue
