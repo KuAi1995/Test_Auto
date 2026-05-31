@@ -59,3 +59,10 @@
 - [决策] Monkey 使用 --ignore-crashes/timeouts 持续执行，事后分析日志
 - [决策] 报告同时输出 HTML（人读）和 JSON（程序读）
 - [待办] 集成测试：连接真实设备验证完整流程
+
+### 16:04 Pipeline 编排器
+
+- [已解决] 完整流程编排器实现
+- [决策] `python -m test_auto run` 一键执行: clone → 分析 → 生成 → 报告
+- [决策] 支持 --skip-clone 跳过仓库同步（开发调试用）
+- FUOS 完整流程验证通过：0.2s 完成分析+生成+报告

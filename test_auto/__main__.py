@@ -52,6 +52,11 @@ def main() -> int:
     # init 子命令
     subparsers.add_parser("init", help="初始化工作目录和数据库")
 
+    # run 子命令
+    run_parser = subparsers.add_parser("run", help="执行完整测试流程")
+    run_parser.add_argument("--name", help="仓库名称")
+    run_parser.add_argument("--skip-clone", action="store_true", help="跳过仓库同步")
+
     args = parser.parse_args()
 
     from pathlib import Path
@@ -124,6 +129,13 @@ def main() -> int:
 
     if args.command is None:
         parser.print_help()
+        return 0
+
+    if args.command == "run":
+        from test_auto.pipeline import Pipeline
+
+        pipeline = Pipeline(settings)
+        pipeline.run(repo_name=args.name, skip_clone=args.skip_clone)
         return 0
 
     if args.command == "generate":
