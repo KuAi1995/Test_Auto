@@ -57,6 +57,20 @@ def main() -> int:
     run_parser.add_argument("--name", help="仓库名称")
     run_parser.add_argument("--skip-clone", action="store_true", help="跳过仓库同步")
 
+    # coverage 子命令
+    cov_parser = subparsers.add_parser("coverage", help="覆盖率分析")
+    cov_parser.add_argument("--name", help="仓库名称")
+
+    # cases 子命令
+    cases_parser = subparsers.add_parser("cases", help="测试用例管理")
+    cases_parser.add_argument("action", choices=["import", "export", "list", "stats"], help="操作")
+    cases_parser.add_argument("--file", help="YAML 文件路径")
+    cases_parser.add_argument("--module", help="按模块筛选")
+
+    # history 子命令
+    hist_parser = subparsers.add_parser("history", help="测试运行历史")
+    hist_parser.add_argument("--limit", type=int, default=10, help="显示条数")
+
     args = parser.parse_args()
 
     from pathlib import Path
@@ -171,6 +185,85 @@ def main() -> int:
             gen = ManualTestGenerator(output_dir)
             output_file = gen.generate_for_project(result.classes, result.methods)
             print(f"\n测试用例已生成 → {output_file}")
+        return 0
+
+    if args.command == "coverage":
+        from pathlib import Path as P
+
+        from test_auto.analyzer.coverage import analyze_coverage
+        from test_auto.analyzer.scanner import Analyzer
+
+        workspace = P(settings.workspace_dir)
+        name = args.name or next(iter(settings.repos), None)
+        if not name:
+            logger.error("未配置仓库")
+            return 1
+        repo_path = workspace / name
+        if not repo_path.exists():
+            logger.error("仓库未 clone: %s", name)
+            return 1
+
+        analyzer = Analyzer(repo_path)
+        result = analyzer.analyze()
+        test_dir = P("output/tests") / name
+        coverage = analyze_coverage(result.classes, result.methods, test_dir)
+        print(f"\n覆盖率: {coverage.summary()}")
+        if coverage.untested_classes:
+            print(f"\n未覆盖的类 ({len(coverage.untested_classes)}):")
+            for c in coverage.untested_classes:
+                print(f"  ✗ {c}")
+        return 0
+
+    if args.command == "cases":
+        from pathlib import Path as P
+
+        from test_auto.storage.case_manager import CaseManager
+        from test_auto.storage.database import Database
+
+        db = Database(settings.storage.db_path)
+        db.init_schema()
+        mgr = CaseManager(db)
+
+        if args.action == "import":
+            if not args.file:
+                logger.error("需要 --file 参数")
+                return 1
+            mgr.import_from_yaml(P(args.file))
+        elif args.action == "export":
+            output = P(args.file) if args.file else P("output/cases_export.yaml")
+            mgr.export_to_yaml(output, module=args.module)
+        elif args.action == "list":
+            cases = mgr.list_cases(module=args.module)
+            for c in cases:
+                print(f"  [{c['priority']}] {c['id']}: {c['title']}")
+            print(f"\n共 {len(cases)} 条")
+        elif args.action == "stats":
+            stats = mgr.get_stats()
+            print(f"\n用例统计: 总计 {stats['total']} 条")
+            print("  按优先级:")
+            for p, cnt in stats["by_priority"].items():
+                print(f"    {p}: {cnt}")
+            print("  按模块:")
+            for m, cnt in stats["by_module"].items():
+                print(f"    {m}: {cnt}")
+        db.close()
+        return 0
+
+    if args.command == "history":
+        from test_auto.storage.database import Database
+
+        db = Database(settings.storage.db_path)
+        db.init_schema()
+        runs = db.get_run_history(limit=args.limit)
+        if not runs:
+            print("暂无运行记录")
+        else:
+            print(f"\n最近 {len(runs)} 次运行:")
+            for r in runs:
+                print(f"  [{r['started_at'][:16]}] {r['test_type']} | "
+                      f"total={r['total']} pass={r['passed']} fail={r['failed']} | "
+                      f"{r.get('repo_name', '')}")
+        db.close()
         return 0
 
     logger.warning("未实现的命令: %s", args.command)
