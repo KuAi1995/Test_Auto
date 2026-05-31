@@ -34,7 +34,7 @@
 - [ ] 边界值 / 异常路径自动推断
 
 #### M4 人工测试用例
-- [ ] generator/manual：结构化用例模板
+- [x] generator/manual：结构化用例模板
 - [ ] 用例 CRUD（SQLite 存储）
 - [ ] 用例导入/导出（YAML/Excel）
 

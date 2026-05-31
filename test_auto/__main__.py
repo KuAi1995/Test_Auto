@@ -153,7 +153,12 @@ def main() -> int:
             for f in files:
                 print(f"  {f.relative_to(output_dir)}")
         else:
-            logger.warning("manual 生成器尚未实现")
+            from test_auto.generator.manual.generator import ManualTestGenerator
+
+            output_dir = P(args.output) if args.output else P("output/cases") / name
+            gen = ManualTestGenerator(output_dir)
+            output_file = gen.generate_for_project(result.classes, result.methods)
+            print(f"\n测试用例已生成 → {output_file}")
         return 0
 
     logger.warning("未实现的命令: %s", args.command)
