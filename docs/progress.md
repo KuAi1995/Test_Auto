@@ -39,23 +39,23 @@
 - [ ] 用例导入/导出（YAML/Excel）
 
 #### M5 UI 自动化
-- [ ] runner/ui：uiautomator2 集成
+- [x] runner/ui：uiautomator2 集成
 - [ ] 页面对象模型（POM）
 - [ ] 测试脚本录制/回放
 
 #### M6 稳定性测试
-- [ ] runner/stability：Monkey 封装
+- [x] runner/stability：Monkey 封装
 - [ ] 自定义事件序列
 - [ ] 崩溃/ANR 日志收集与分析
 
 #### M7 OpenCV UI 对比
-- [ ] runner/opencv：截图采集
-- [ ] SSIM 相似度计算
-- [ ] 差异区域标注 + mask 排除
+- [x] runner/opencv：SSIM 相似度计算
+- [x] 差异区域标注 + mask 排除
 - [ ] 基线管理（版本化）
 
 #### M8 报告
-- [ ] reporter：HTML 报告模板
+- [x] reporter：HTML 报告模板
+- [x] JSON 报告输出
 - [ ] 测试趋势图表
 - [ ] 失败用例截图嵌入
 
@@ -73,8 +73,8 @@
 | repo | ✅ | clone/pull/status |
 | analyzer | ✅ | Java AST (javalang) |
 | generator | 🟡 | unit 生成器完成 |
-| runner | ⬜ | 待实现 |
-| reporter | ⬜ | 待实现 |
+| runner | 🟡 | ui/stability/opencv 核心完成 |
+| reporter | ✅ | HTML + JSON |
 | storage | ✅ | SQLite schema v1 |
 | utils | 🟡 | ADB 封装完成 |
 | models | ✅ | 核心数据模型 |
