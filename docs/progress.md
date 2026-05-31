@@ -22,7 +22,8 @@
 ### 待实现
 
 #### M2 仓库管理 + 代码分析
-- [ ] analyzer：Java/Kotlin AST 解析（tree-sitter）
+- [x] analyzer：Java AST 解析（javalang）
+- [x] analyzer：类/方法/依赖提取
 - [ ] analyzer：类/方法/依赖提取
 - [ ] analyzer：覆盖率分析接口
 
@@ -69,7 +70,7 @@
 |------|------|------|
 | config | ✅ | Pydantic v2 + YAML |
 | repo | ✅ | clone/pull/status |
-| analyzer | ⬜ | 待实现 |
+| analyzer | ✅ | Java AST (javalang) |
 | generator | ⬜ | 待实现 |
 | runner | ⬜ | 待实现 |
 | reporter | ⬜ | 待实现 |

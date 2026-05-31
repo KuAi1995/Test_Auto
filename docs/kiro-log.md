@@ -19,3 +19,12 @@
 - [决策] CLI 入口: python -m test_auto，子命令 init/devices/repo/analyze
 - [决策] ADB 封装: subprocess + timeout，统一通过 utils/adb.py 调用
 - [决策] pyproject.toml 指定 setuptools packages.find include=["test_auto*"] 避免 flat-layout 冲突
+
+### 15:57 M2 代码分析器
+
+- [已解决] Java AST 分析器实现完成
+- [决策] 使用 javalang 库解析 Java AST（轻量，纯 Python，无需 tree-sitter 编译）
+- [决策] 分析器跳过 build/ test/ androidTest/ 目录
+- [决策] 自动识别 Activity/Fragment（基于继承关系）
+- FUOS 项目分析结果：28 类、109 方法、4 包、10 Activity
+- [待办] M3 单元测试生成器（基于分析结果）

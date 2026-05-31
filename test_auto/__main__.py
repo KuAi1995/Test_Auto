@@ -96,6 +96,26 @@ def main() -> int:
             mgr.status(args.name)
         return 0
 
+    if args.command == "analyze":
+        from pathlib import Path as P
+
+        from test_auto.analyzer.scanner import Analyzer
+
+        # 分析所有已 clone 的仓库
+        workspace = P(settings.workspace_dir)
+        for name in settings.repos:
+            repo_path = workspace / name
+            if not repo_path.exists():
+                logger.warning("仓库未 clone: %s，跳过", name)
+                continue
+            logger.info("分析仓库: %s", name)
+            analyzer = Analyzer(repo_path)
+            result = analyzer.analyze()
+            print(f"\n[{name}] {result.summary()}")
+            for cls in result.classes:
+                print(f"  {cls.package}.{cls.name} ({cls.superclass or 'Object'}) - {len(cls.methods)} methods")
+        return 0
+
     if args.command is None:
         parser.print_help()
         return 0
