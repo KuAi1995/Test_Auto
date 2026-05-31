@@ -40,6 +40,12 @@ def main() -> int:
     # analyze 子命令
     subparsers.add_parser("analyze", help="代码分析")
 
+    # generate 子命令
+    gen_parser = subparsers.add_parser("generate", help="生成测试")
+    gen_parser.add_argument("type", choices=["unit", "manual"], help="测试类型")
+    gen_parser.add_argument("--name", help="仓库名称")
+    gen_parser.add_argument("--output", help="输出目录", default=None)
+
     # devices 子命令
     subparsers.add_parser("devices", help="列出已连接设备")
 
@@ -118,6 +124,36 @@ def main() -> int:
 
     if args.command is None:
         parser.print_help()
+        return 0
+
+    if args.command == "generate":
+        from pathlib import Path as P
+
+        from test_auto.analyzer.scanner import Analyzer
+        from test_auto.generator.unit.generator import UnitTestGenerator
+
+        workspace = P(settings.workspace_dir)
+        name = args.name or next(iter(settings.repos), None)
+        if not name:
+            logger.error("未配置仓库")
+            return 1
+        repo_path = workspace / name
+        if not repo_path.exists():
+            logger.error("仓库未 clone: %s", name)
+            return 1
+
+        analyzer = Analyzer(repo_path)
+        result = analyzer.analyze()
+
+        if args.type == "unit":
+            output_dir = P(args.output) if args.output else P("output/tests") / name
+            gen = UnitTestGenerator(output_dir)
+            files = gen.generate_for_project(result.classes, result.methods)
+            print(f"\n生成 {len(files)} 个单元测试文件 → {output_dir}")
+            for f in files:
+                print(f"  {f.relative_to(output_dir)}")
+        else:
+            logger.warning("manual 生成器尚未实现")
         return 0
 
     logger.warning("未实现的命令: %s", args.command)

@@ -28,8 +28,9 @@
 - [ ] analyzer：覆盖率分析接口
 
 #### M3 单元测试生成
-- [ ] generator/unit：基于分析结果生成 JUnit 测试
-- [ ] 模板引擎（Jinja2）
+- [x] generator/unit：基于分析结果生成 JUnit 测试
+- [x] 自动区分 Robolectric / 纯 JUnit
+- [ ] 模板引擎（Jinja2）— 当前用字符串模板，够用
 - [ ] 边界值 / 异常路径自动推断
 
 #### M4 人工测试用例
@@ -71,7 +72,7 @@
 | config | ✅ | Pydantic v2 + YAML |
 | repo | ✅ | clone/pull/status |
 | analyzer | ✅ | Java AST (javalang) |
-| generator | ⬜ | 待实现 |
+| generator | 🟡 | unit 生成器完成 |
 | runner | ⬜ | 待实现 |
 | reporter | ⬜ | 待实现 |
 | storage | ✅ | SQLite schema v1 |
